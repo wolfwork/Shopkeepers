@@ -99,7 +99,7 @@ public abstract class Shopkeeper {
 	public abstract ShopType<?> getType();
 
 	public String getName() {
-		return this.name;
+		return Utils.colorize(this.name);
 	}
 
 	public void setName(String name) {

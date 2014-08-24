@@ -38,7 +38,8 @@ public abstract class EditorHandler extends UIHandler {
 	@Override
 	protected boolean canOpen(Player player) {
 		assert player != null;
-		return this.getShopkeeper().getType().hasPermission(player); //TODO is this correct?
+		return this.getShopkeeper().getType().hasPermission(player);
+		// owner is checked in the PlayerShopkeeper specific EditorHandler
 	}
 
 	@Override
@@ -50,6 +51,7 @@ public abstract class EditorHandler extends UIHandler {
 	protected void onInventoryClose(InventoryCloseEvent event, Player player) {
 		this.saveEditor(event.getInventory(), player);
 		this.shopkeeper.closeAllOpenWindows();
+		ShopkeepersPlugin.getInstance().save();
 	}
 
 	@Override
@@ -158,7 +160,7 @@ public abstract class EditorHandler extends UIHandler {
 	}
 
 	protected void setActionButtons(Inventory inventory) {
-		//no naming button for citizens player shops if renaming id disabled for those
+		// no naming button for citizens player shops if renaming id disabled for those
 		if (Settings.allowRenamingOfPlayerNpcShops || !this.shopkeeper.getType().isPlayerShopType() || this.shopkeeper.getShopObject().getObjectType() != DefaultShopObjectTypes.CITIZEN) {
 			inventory.setItem(8, Settings.createNameButtonItem());
 			// TODO restructure this, so that the button types can be registered and unregistered (instead of this condition check here)

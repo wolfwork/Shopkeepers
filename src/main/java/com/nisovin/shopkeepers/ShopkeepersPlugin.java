@@ -32,7 +32,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -85,7 +84,7 @@ public class ShopkeepersPlugin extends JavaPlugin implements ShopkeepersAPI {
 
 	// all shopkeepers:
 	private final Map<ChunkData, List<Shopkeeper>> shopkeepersByChunk = new HashMap<ChunkData, List<Shopkeeper>>();
-	private final Map<String, Shopkeeper> activeShopkeepers = new HashMap<String, Shopkeeper>(); //TODO remove this (?)
+	private final Map<String, Shopkeeper> activeShopkeepers = new HashMap<String, Shopkeeper>(); // TODO remove this (?)
 
 	private final Map<String, Shopkeeper> naming = Collections.synchronizedMap(new HashMap<String, Shopkeeper>());
 	private final Map<String, List<String>> recentlyPlacedChests = new HashMap<String, List<String>>();
@@ -170,16 +169,14 @@ public class ShopkeepersPlugin extends JavaPlugin implements ShopkeepersAPI {
 		}
 		if (Settings.enableCitizenShops) {
 			try {
-				Plugin plugin = pm.getPlugin("Citizens");
-				if (plugin == null) {
-					Log.warning("Citizens Shops enabled, but Citizens plugin not found.");
+				if (!CitizensHandler.isEnabled()) {
+					Log.warning("Citizens Shops enabled, but Citizens plugin not found or disabled.");
 					Settings.enableCitizenShops = false;
 				} else {
 					this.getLogger().info("Citizens found, enabling NPC shopkeepers");
 					CitizensShopkeeperTrait.registerTrait();
 				}
 			} catch (Throwable ex) {
-
 			}
 		}
 
@@ -649,7 +646,13 @@ public class ShopkeepersPlugin extends JavaPlugin implements ShopkeepersAPI {
 	@Override
 	public Shopkeeper createNewPlayerShopkeeper(ShopCreationData creationData) {
 		if (creationData == null || creationData.shopType == null || creationData.objectType == null
-				|| creationData.creator == null || creationData.location == null) {
+				|| creationData.creator == null || creationData.chest == null || creationData.location == null) {
+			return null;
+		}
+
+		// check if this chest is already used by some other shopkeeper:
+		if (this.isChestProtected(null, creationData.chest)) {
+			Utils.sendMessage(creationData.creator, Settings.msgShopCreateFail);
 			return null;
 		}
 

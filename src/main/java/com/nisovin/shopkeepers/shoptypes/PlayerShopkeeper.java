@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -154,13 +153,39 @@ public abstract class PlayerShopkeeper extends Shopkeeper {
 		protected PlayerShopTradingHandler(UIManager uiManager, PlayerShopkeeper shopkeeper) {
 			super(uiManager, shopkeeper);
 		}
+		
+		@Override
+		protected boolean canOpen(Player player) {
+			if (!super.canOpen(player)) return false;
+
+			// stop opening if trading shall be prevented while the owner is offline:
+			if (Settings.preventTradingWhileOwnerIsOnline && !player.hasPermission("shopkeeper.bypass")) {
+				Player ownerPlayer = ((PlayerShopkeeper) this.shopkeeper).getOwner();
+				if (ownerPlayer != null) {
+					Utils.sendMessage(player, Settings.msgCantTradeWhileOwnerOnline, "{owner}", ownerPlayer.getName());
+					Log.debug("Blocked trade window opening from " + player.getName() + " because the owner is online");
+					return false;
+				}
+			}
+			return true;
+		}
 
 		@Override
 		protected void onPurchaseClick(InventoryClickEvent event, Player player) {
-			if (Settings.preventTradingWithOwnShop && ((PlayerShopkeeper) this.shopkeeper).isOwner((Player) event.getWhoClicked()) && !event.getWhoClicked().isOp()) {
+			if (Settings.preventTradingWithOwnShop && ((PlayerShopkeeper) this.shopkeeper).isOwner(player) && !player.isOp()) {
 				event.setCancelled(true);
-				Log.debug("Cancelled trade from " + event.getWhoClicked().getName() + " because he can't trade with his own shop");
+				Log.debug("Cancelled trade from " + player.getName() + " because he can't trade with his own shop");
 				return;
+			}
+
+			if (Settings.preventTradingWhileOwnerIsOnline && !player.hasPermission("shopkeeper.bypass")) {
+				Player ownerPlayer = ((PlayerShopkeeper) this.shopkeeper).getOwner();
+				if (ownerPlayer != null && !((PlayerShopkeeper) this.shopkeeper).isOwner(player)) {
+					Utils.sendMessage(player, Settings.msgCantTradeWhileOwnerOnline, "{owner}", ownerPlayer.getName());
+					event.setCancelled(true);
+					Log.debug("Cancelled trade from " + event.getWhoClicked().getName() + " because the owner is online");
+					return;
+				}
 			}
 
 			// prevent unwanted special clicks
@@ -223,7 +248,7 @@ public abstract class PlayerShopkeeper extends Shopkeeper {
 
 		@Override
 		protected boolean openWindow(Player player) {
-			Inventory inventory = Bukkit.createInventory(player, 9, ChatColor.translateAlternateColorCodes('&', Settings.forHireTitle));
+			Inventory inventory = Bukkit.createInventory(player, 9, Utils.colorize(Settings.forHireTitle));
 
 			ItemStack hireItem = Settings.createHireButtonItem();
 			inventory.setItem(2, hireItem);
@@ -390,6 +415,21 @@ public abstract class PlayerShopkeeper extends Shopkeeper {
 	public boolean isOwner(Player player) {
 		// the player is online, so this shopkeeper should already have an uuid assigned if that player is the owner:
 		return this.ownerUUID != null && player.getUniqueId().equals(this.ownerUUID);
+	}
+
+	/**
+	 * Gets the owner of this shop IF he is online.
+	 * 
+	 * @return the owner of this shop, null if the owner is offline
+	 */
+	public Player getOwner() {
+		// owner name should always be given, so try with that first
+		// afterwards compare uuids to be sure:
+		Player ownerPlayer = Bukkit.getPlayer(this.ownerName);
+		if (ownerPlayer != null && ownerPlayer.getUniqueId().equals(ownerUUID)) {
+			return ownerPlayer;
+		}
+		return null;
 	}
 
 	public boolean isForHire() {

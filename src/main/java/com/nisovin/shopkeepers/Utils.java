@@ -28,10 +28,8 @@ public class Utils {
 		if (plugin == null) return false;
 		for (BlockFace face : Utils.chestProtectFaces) {
 			Block b = chest.getRelative(face);
-			if (isChest(b.getType())) {
-				if (plugin.isChestProtected(player, b)) {
-					return true;
-				}
+			if (isChest(b.getType()) && plugin.isChestProtected(player, b)) {
+				return true;
 			}
 		}
 		return false;
@@ -42,10 +40,8 @@ public class Utils {
 		if (plugin == null) return false;
 		for (BlockFace face : Utils.hopperProtectFaces) {
 			Block b = hopper.getRelative(face);
-			if (Utils.isChest(b.getType())) {
-				if (plugin.isChestProtected(player, b)) {
-					return true;
-				}
+			if (Utils.isChest(b.getType()) && plugin.isChestProtected(player, b)) {
+				return true;
 			}
 		}
 		return false;
@@ -53,6 +49,11 @@ public class Utils {
 
 	// messages:
 
+	public static String colorize(String message) {
+		if (message == null || message.isEmpty()) return message;
+		return ChatColor.translateAlternateColorCodes('&', message);
+	}
+	
 	public static void sendMessage(Player player, String message, String... args) {
 		// skip if player is null or message is "empty":
 		if (player == null || message == null || message.isEmpty()) return;
@@ -69,7 +70,7 @@ public class Utils {
 			}
 		}
 
-		message = ChatColor.translateAlternateColorCodes('&', message);
+		message = Utils.colorize(message);
 		String[] msgs = message.split("\n");
 		for (String msg : msgs) {
 			player.sendMessage(msg);
@@ -85,10 +86,10 @@ public class Utils {
 
 	public static ItemStack setItemStackNameAndLore(ItemStack item, String name, List<String> lore) {
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+		meta.setDisplayName(Utils.colorize(name));
 		List<String> loreColored = new ArrayList<String>(lore.size());
 		for (String loreString : lore) {
-			loreColored.add(ChatColor.translateAlternateColorCodes('&', loreString));
+			loreColored.add(Utils.colorize(loreString));
 		}
 		meta.setLore(loreColored);
 		item.setItemMeta(meta);

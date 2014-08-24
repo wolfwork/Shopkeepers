@@ -64,7 +64,7 @@ class CommandManager implements CommandExecutor {
 					Utils.sendMessage(player, Settings.msgUnknownPlayer);
 					return true;
 				}
-				if (Utils.isChest(block.getType())) {
+				if (!Utils.isChest(block.getType())) {
 					Utils.sendMessage(player, Settings.msgMustTargetChest);
 					return true;
 				}
@@ -73,7 +73,7 @@ class CommandManager implements CommandExecutor {
 					Utils.sendMessage(player, Settings.msgUnusedChest);
 					return true;
 				}
-				if (!player.isOp() && !player.hasPermission("shopkeeper.bypass")) {
+				if (!player.hasPermission("shopkeeper.bypass")) {
 					for (PlayerShopkeeper shopkeeper : shopkeepers) {
 						if (!shopkeeper.isOwner(player)) {
 							Utils.sendMessage(player, Settings.msgNotOwner);
@@ -91,7 +91,7 @@ class CommandManager implements CommandExecutor {
 
 			// set for hire
 			if (args.length == 1 && args[0].equalsIgnoreCase("setforhire") && player.hasPermission("shopkeeper.setforhire")) {
-				if (Utils.isChest(block.getType())) {
+				if (!Utils.isChest(block.getType())) {
 					Utils.sendMessage(player, Settings.msgMustTargetChest);
 					return true;
 				}
@@ -100,7 +100,7 @@ class CommandManager implements CommandExecutor {
 					Utils.sendMessage(player, Settings.msgUnusedChest);
 					return true;
 				}
-				if (!player.isOp() && !player.hasPermission("shopkeeper.bypass")) {
+				if (!player.hasPermission("shopkeeper.bypass")) {
 					for (PlayerShopkeeper shopkeeper : shopkeepers) {
 						if (!shopkeeper.isOwner(player)) {
 							Utils.sendMessage(player, Settings.msgNotOwner);
@@ -147,8 +147,9 @@ class CommandManager implements CommandExecutor {
 			// get the spawn location for the shopkeeper
 			if (block != null && block.getType() != Material.AIR) {
 				if (Settings.createPlayerShopWithCommand && Utils.isChest(block.getType())) {
-					// check if already a chest
+					// check if this chest is already used by some other shopkeeper:
 					if (plugin.isChestProtected(null, block)) {
+						Utils.sendMessage(player, Settings.msgShopCreateFail);
 						return true;
 					}
 					// check for recently placed

@@ -19,6 +19,7 @@ import com.nisovin.shopkeepers.ShopCreationData;
 import com.nisovin.shopkeepers.ShopObject;
 import com.nisovin.shopkeepers.ShopObjectType;
 import com.nisovin.shopkeepers.Shopkeeper;
+import com.nisovin.shopkeepers.Utils;
 import com.nisovin.shopkeepers.pluginhandlers.CitizensHandler;
 import com.nisovin.shopkeepers.shoptypes.PlayerShopkeeper;
 
@@ -51,7 +52,7 @@ public class CitizensShop extends ShopObject {
 	@Override
 	protected void onInit() {
 		if (this.isActive()) return;
-		if (!CitizensHandler.isEnabled()) return;
+		//if (!CitizensHandler.isEnabled()) return;
 
 		EntityType entityType;
 		String name;
@@ -88,7 +89,7 @@ public class CitizensShop extends ShopObject {
 
 	@Override
 	public boolean isActive() {
-		return this.npcId != null;
+		return this.npcId != null && CitizensHandler.isEnabled();
 	}
 
 	@Override
@@ -121,7 +122,7 @@ public class CitizensShop extends ShopObject {
 			if (Settings.nameplatePrefix != null && !Settings.nameplatePrefix.isEmpty()) {
 				name = Settings.nameplatePrefix + name;
 			}
-			name = ChatColor.translateAlternateColorCodes('&', name);
+			name = Utils.colorize(name);
 			name = this.trimToNameLength(name);
 			// set entity name plate:
 			npc.setName(name);

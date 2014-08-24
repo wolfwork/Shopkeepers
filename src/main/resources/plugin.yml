@@ -1,5 +1,5 @@
 name: Shopkeepers
-version: '1.20'
+version: '1.25'
 description: Custom villager shopkeepers
 author: nisovin
 website: http://dev.bukkit.org/server-mods/shopkeepers/
@@ -13,6 +13,9 @@ commands:
         aliases: [shopkeepers]
         
 permissions:
+    shopkeeper.trade:
+        description: Trade with shopkeepers
+        default: true
     shopkeeper.reload:
         description: Reloads the plugin
         default: op
@@ -60,13 +63,13 @@ permissions:
         default: true
 
     shopkeeper.sign:
-        description: Create sign shopkeepers.
+        description: Create sign shopkeepers
         default: true
     shopkeeper.citizen:
-        description: Create citizens shopkeepers.
+        description: Create citizens shopkeepers
         default: op
     shopkeeper.entity.*:
-        description: Create shopkeepers of all entity types.
+        description: Create shopkeepers of all entity types
         default: op
 
     shopkeeper.villager:
